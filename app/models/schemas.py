@@ -1,0 +1,37 @@
+from pydantic import BaseModel, Field
+
+
+class QuestionResult(BaseModel):
+    answer: str
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
+class ExtractionStats(BaseModel):
+    total_questions: int
+    above_threshold: int
+    below_threshold: int
+    processing_time_seconds: float
+
+
+class ExtractionResponse(BaseModel):
+    template: str
+    threshold: float
+    results: dict[str, QuestionResult]
+    filtered_results: dict[str, str]
+    stats: ExtractionStats
+
+
+class TemplateInfo(BaseModel):
+    name: str
+    description: str
+    questions: dict[str, str]
+
+
+class TemplateListResponse(BaseModel):
+    templates: list[TemplateInfo]
+
+
+class HealthResponse(BaseModel):
+    status: str
+    ollama_connected: bool
+    model: str
