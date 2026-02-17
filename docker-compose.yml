@@ -1,6 +1,7 @@
 services:
   ollama:
     image: ollama/ollama:latest
+    profiles: [ollama]
     ports:
       - "11434:11434"
     volumes:
@@ -12,11 +13,8 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      - APP_OLLAMA_BASE_URL=http://ollama:11434
-      - APP_OLLAMA_MODEL=qwen2.5:7b
-    depends_on:
-      - ollama
+    env_file:
+      - .env
     volumes:
       - ./app:/app/app  # Hot reload source files
 

@@ -8,7 +8,7 @@ from app.models.schemas import (
     TemplateListResponse,
 )
 from app.services.extractor import extract_from_document
-from app.services.llm import check_ollama_health
+from app.services.llm import check_health
 from app.services.ocr import extract_text
 from app.templates.funding import get_template, list_templates
 
@@ -90,10 +90,11 @@ async def get_templates():
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Check service health and Ollama connectivity."""
-    connected = await check_ollama_health()
+    """Check service health and LLM provider connectivity."""
+    connected = await check_health()
     return HealthResponse(
         status="ok" if connected else "degraded",
-        ollama_connected=connected,
-        model=settings.ollama_model,
+        provider=settings.llm_provider,
+        provider_connected=connected,
+        model=settings.effective_model,
     )

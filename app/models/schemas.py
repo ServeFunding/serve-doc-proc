@@ -33,5 +33,6 @@ class TemplateListResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
-    ollama_connected: bool
+    provider: str
+    provider_connected: bool
     model: str
