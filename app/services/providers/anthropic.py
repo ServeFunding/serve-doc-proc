@@ -18,7 +18,9 @@ class AnthropicProvider:
     def __init__(self) -> None:
         import anthropic
 
-        self._client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+        self._client = anthropic.AsyncAnthropic(
+            api_key=settings.anthropic_api_key or "missing",
+        )
 
     async def ask_question(self, document_text: str, question: str) -> dict:
         """Send a question about a document to Claude and parse the JSON response."""
@@ -51,15 +53,14 @@ class AnthropicProvider:
         return {"answer": "Error: extraction failed", "confidence": 0.0}
 
     async def check_health(self) -> bool:
-        """Check if the Anthropic API is reachable."""
+        """Check if the Anthropic API is reachable with a minimal counting request."""
         import anthropic
 
         try:
-            await self._client.messages.create(
+            await self._client.messages.count_tokens(
                 model=settings.effective_model,
-                max_tokens=10,
                 messages=[{"role": "user", "content": "ping"}],
             )
             return True
-        except anthropic.APIError:
+        except (anthropic.APIError, anthropic.AuthenticationError):
             return False
