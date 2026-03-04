@@ -90,12 +90,23 @@ export default function ExtractionForm() {
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
-            <p className="text-sm text-gray-600">
-              {file ? file.name : "Drop a file here, or click to browse"}
-            </p>
-            <p className="mt-1 text-xs text-gray-400">
-              PDF, PNG, JPEG, TIFF, BMP
-            </p>
+            {file ? (
+              <>
+                <p className="text-sm font-medium text-blue-600">{file.name}</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  {(file.size / 1024).toFixed(0)} KB — click or drop to replace
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600">
+                  Drop a file here, or click to browse
+                </p>
+                <p className="mt-1 text-xs text-gray-400">
+                  PDF, PNG, JPEG, TIFF, BMP
+                </p>
+              </>
+            )}
             <input
               ref={inputRef}
               type="file"
