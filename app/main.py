@@ -13,9 +13,10 @@ app = FastAPI(
 
 allowed_origins = [
     "http://localhost:3000",
+    "https://serve-doc-proc.vercel.app",
 ]
-if vercel_url := os.getenv("APP_CORS_ORIGIN"):
-    allowed_origins.append(vercel_url)
+if extra_origin := os.getenv("APP_CORS_ORIGIN"):
+    allowed_origins.append(extra_origin)
 
 app.add_middleware(
     CORSMiddleware,
