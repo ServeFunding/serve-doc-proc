@@ -6,6 +6,7 @@ import { fetchHealth } from "@/lib/api";
 
 export function useHealth(intervalMs = 30_000) {
   const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -16,6 +17,8 @@ export function useHealth(intervalMs = 30_000) {
         if (mounted) setHealth(data);
       } catch {
         if (mounted) setHealth(null);
+      } finally {
+        if (mounted) setChecked(true);
       }
     };
 
@@ -27,5 +30,5 @@ export function useHealth(intervalMs = 30_000) {
     };
   }, [intervalMs]);
 
-  return health;
+  return { health, checked };
 }

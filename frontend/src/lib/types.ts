@@ -10,6 +10,12 @@ export interface ExtractionStats {
   processing_time_seconds: number;
 }
 
+export interface EntityResult {
+  name: string;
+  results: Record<string, QuestionResult>;
+  filtered_results: Record<string, string>;
+}
+
 export interface ExtractionResponse {
   template: string;
   threshold: number;
@@ -17,6 +23,7 @@ export interface ExtractionResponse {
   results: Record<string, QuestionResult>;
   filtered_results: Record<string, string>;
   stats: ExtractionStats;
+  entities?: EntityResult[];
 }
 
 export interface TemplateInfo {

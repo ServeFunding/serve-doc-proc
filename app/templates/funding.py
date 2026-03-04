@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 TEMPLATES: dict[str, dict] = {
     "merchant_application": {
         "description": "Merchant funding application — populates Deal record",
@@ -162,9 +164,56 @@ TEMPLATES: dict[str, dict] = {
 }
 
 
+import json
+import logging
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+CUSTOM_DIR = Path(__file__).parent / "custom"
+
+
+def _load_custom(name: str) -> dict[str, str] | None:
+    """Load custom question overrides from JSON file."""
+    path = CUSTOM_DIR / f"{name}.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text())
+        return data.get("questions", {})
+    except Exception:
+        logger.warning("Failed to load custom template %s", name)
+        return None
+
+
 def get_template(name: str) -> dict | None:
-    return TEMPLATES.get(name)
+    base = TEMPLATES.get(name)
+    if base is None:
+        return None
+    custom = _load_custom(name)
+    if custom is None:
+        return base
+    # Custom questions fully replace the base set
+    return {**base, "questions": custom}
 
 
 def list_templates() -> dict[str, dict]:
-    return TEMPLATES
+    return {name: get_template(name) for name in TEMPLATES}  # type: ignore[misc]
+
+
+def save_custom_questions(name: str, questions: dict[str, str]) -> None:
+    """Save custom question overrides for a template."""
+    if name not in TEMPLATES:
+        raise ValueError(f"Unknown template: {name}")
+    CUSTOM_DIR.mkdir(parents=True, exist_ok=True)
+    path = CUSTOM_DIR / f"{name}.json"
+    path.write_text(json.dumps({"questions": questions}, indent=2))
+
+
+def delete_custom_questions(name: str) -> bool:
+    """Delete custom overrides, reverting to defaults. Returns True if file existed."""
+    path = CUSTOM_DIR / f"{name}.json"
+    if path.exists():
+        path.unlink()
+        return True
+    return False

@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -20,6 +22,7 @@ class ExtractionResponse(BaseModel):
     results: dict[str, QuestionResult]
     filtered_results: dict[str, str]
     stats: ExtractionStats
+    entities: Optional[List["EntityResult"]] = None
 
 
 class TemplateInfo(BaseModel):
@@ -30,6 +33,16 @@ class TemplateInfo(BaseModel):
 
 class TemplateListResponse(BaseModel):
     templates: list[TemplateInfo]
+
+
+class TemplateUpdateRequest(BaseModel):
+    questions: dict[str, str]
+
+
+class EntityResult(BaseModel):
+    name: str
+    results: dict[str, QuestionResult]
+    filtered_results: dict[str, str]
 
 
 class HealthResponse(BaseModel):

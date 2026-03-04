@@ -20,7 +20,9 @@ class OpenAIProvider:
 
         self._client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
 
-    async def ask_question(self, document_text: str, question: str) -> dict:
+    async def ask_question(
+        self, document_text: str, question: str, *, system_prompt: str = ""
+    ) -> dict:
         """Send a question about a document to GPT and parse the JSON response."""
         import openai
 
@@ -30,7 +32,7 @@ class OpenAIProvider:
                 response = await self._client.chat.completions.create(
                     model=settings.effective_model,
                     messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "system", "content": system_prompt or SYSTEM_PROMPT},
                         {
                             "role": "user",
                             "content": build_user_message(document_text, question),

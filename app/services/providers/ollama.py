@@ -18,13 +18,15 @@ logger = logging.getLogger(__name__)
 class OllamaProvider:
     """LLM provider using a local Ollama instance via its OpenAI-compatible API."""
 
-    async def ask_question(self, document_text: str, question: str) -> dict:
+    async def ask_question(
+        self, document_text: str, question: str, *, system_prompt: str = ""
+    ) -> dict:
         """Send a question about a document to Ollama and parse the JSON response."""
         url = f"{settings.ollama_base_url}/v1/chat/completions"
         payload = {
             "model": settings.effective_model,
             "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt or SYSTEM_PROMPT},
                 {
                     "role": "user",
                     "content": build_user_message(document_text, question),

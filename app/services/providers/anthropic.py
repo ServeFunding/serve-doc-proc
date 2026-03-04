@@ -22,7 +22,9 @@ class AnthropicProvider:
             api_key=settings.anthropic_api_key or "missing",
         )
 
-    async def ask_question(self, document_text: str, question: str) -> dict:
+    async def ask_question(
+        self, document_text: str, question: str, *, system_prompt: str = ""
+    ) -> dict:
         """Send a question about a document to Claude and parse the JSON response."""
         import anthropic
 
@@ -32,7 +34,7 @@ class AnthropicProvider:
                 message = await self._client.messages.create(
                     model=settings.effective_model,
                     max_tokens=1024,
-                    system=SYSTEM_PROMPT,
+                    system=system_prompt or SYSTEM_PROMPT,
                     messages=[
                         {
                             "role": "user",

@@ -22,6 +22,30 @@ Rules:
 Respond with ONLY the JSON object, no other text."""
 
 
+ENTITY_DETECTION_PROMPT = """You are a document analysis assistant. Examine the document text below and identify all distinct products, loan programs, or entities described.
+
+Return a JSON array of short names, one per product/entity. If the document describes only a single product or entity, return a single-element array.
+
+Example: ["Product A", "Product B"]
+
+Respond with ONLY the JSON array, no other text."""
+
+MULTI_ENTITY_SYSTEM_PROMPT = """You are a document data extraction assistant. You will be given text extracted from a financial document, a specific entity/product name to focus on, and a question about that entity.
+
+Rules:
+1. Answer the question based ONLY on the provided document text, focusing on the specified entity/product.
+2. Return your answer as JSON with exactly two fields: "answer" and "confidence".
+3. "answer" should be the extracted value as a concise string.
+4. "confidence" should be a float between 0.0 and 1.0 indicating how clearly the information appears in the document for this specific entity.
+   - 1.0 = the information is explicitly and clearly stated for this entity
+   - 0.7-0.9 = the information is present but requires minor interpretation
+   - 0.3-0.6 = the information is partially present or ambiguous
+   - 0.0 = the information is not found in the document for this entity
+5. If the information is not found, set "answer" to "Not found" and "confidence" to 0.0.
+
+Respond with ONLY the JSON object, no other text."""
+
+
 def build_user_message(document_text: str, question: str) -> str:
     """Build the user message for the LLM prompt."""
     return f"Document text:\n\n{document_text}\n\nQuestion: {question}"
@@ -40,6 +64,8 @@ def parse_llm_response(content: str) -> dict:
 class LLMProvider(Protocol):
     """Protocol that all LLM providers must implement."""
 
-    async def ask_question(self, document_text: str, question: str) -> dict: ...
+    async def ask_question(
+        self, document_text: str, question: str, *, system_prompt: str = ""
+    ) -> dict: ...
 
     async def check_health(self) -> bool: ...

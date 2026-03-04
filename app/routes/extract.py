@@ -7,11 +7,17 @@ from app.models.schemas import (
     HealthResponse,
     TemplateInfo,
     TemplateListResponse,
+    TemplateUpdateRequest,
 )
 from app.services.extractor import extract_from_document
 from app.services.llm import check_health
 from app.services.ocr import extract_text
-from app.templates.funding import get_template, list_templates
+from app.templates.funding import (
+    delete_custom_questions,
+    get_template,
+    list_templates,
+    save_custom_questions,
+)
 
 router = APIRouter()
 
@@ -45,6 +51,7 @@ async def extract_document(
     template: str = Form("merchant_application"),
     threshold: float = Form(0.7),
     model: str = Form(""),
+    multi_entity: bool = Form(False),
     _key: str = Depends(verify_api_key),
 ):
     """Upload a document and extract structured data using a question template."""
@@ -87,9 +94,34 @@ async def extract_document(
         )
 
     result = await extract_from_document(
-        document_text, template, threshold, model=model
+        document_text, template, threshold, model=model, multi_entity=multi_entity
     )
     return result
+
+
+@router.put("/templates/{name}")
+async def update_template(
+    name: str,
+    body: TemplateUpdateRequest,
+    _key: str = Depends(verify_api_key),
+):
+    """Save custom question overrides for a template."""
+    if get_template(name) is None:
+        raise HTTPException(status_code=404, detail=f"Unknown template: {name}")
+    save_custom_questions(name, body.questions)
+    return {"status": "ok", "template": name}
+
+
+@router.delete("/templates/{name}/custom")
+async def reset_template(
+    name: str,
+    _key: str = Depends(verify_api_key),
+):
+    """Remove custom overrides, reverting template to defaults."""
+    if get_template(name) is None:
+        raise HTTPException(status_code=404, detail=f"Unknown template: {name}")
+    deleted = delete_custom_questions(name)
+    return {"status": "ok", "reset": deleted}
 
 
 @router.get("/templates", response_model=TemplateListResponse)

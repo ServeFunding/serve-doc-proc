@@ -28,10 +28,12 @@ class ModalVLLMProvider:
         )
         self._model_name = model_name
 
-    async def ask_question(self, document_text: str, question: str) -> dict:
+    async def ask_question(
+        self, document_text: str, question: str, *, system_prompt: str = ""
+    ) -> dict:
         user_message = build_user_message(document_text, question)
         try:
-            result = self._cls().generate.remote(SYSTEM_PROMPT, user_message)
+            result = self._cls().generate.remote(system_prompt or SYSTEM_PROMPT, user_message)
             return parse_llm_response(result)
         except Exception as e:
             logger.error("Modal vLLM error (%s): %s", self._model_name, e)

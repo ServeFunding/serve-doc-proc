@@ -7,11 +7,12 @@ import type { ExtractionResponse } from "@/lib/types";
 import ResultsTable from "./ResultsTable";
 import CopyButton from "./CopyButton";
 import StatsBar from "./StatsBar";
+import TemplateEditor from "./TemplateEditor";
 
 const ACCEPTED = ".pdf,.png,.jpg,.jpeg,.tiff,.tif,.bmp";
 
 export default function ExtractionForm() {
-  const { templates, loading: templatesLoading } = useTemplates();
+  const { templates, loading: templatesLoading, refetch } = useTemplates();
   const [template, setTemplate] = useState("");
   const [model, setModel] = useState("qwen-7b");
   const [threshold, setThreshold] = useState(0.7);
@@ -20,12 +21,16 @@ export default function ExtractionForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractionResponse | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [multiEntity, setMultiEntity] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Default to first template once loaded
   if (!template && templates.length > 0) {
     setTemplate(templates[0].name);
   }
+
+  const selectedTemplate = templates.find((t) => t.name === template);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +39,7 @@ export default function ExtractionForm() {
     setLoading(true);
     setError(null);
     try {
-      const data = await extractDocument(file, template, threshold, model);
+      const data = await extractDocument(file, template, threshold, model, multiEntity);
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Extraction failed");
@@ -55,12 +60,24 @@ export default function ExtractionForm() {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Template */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Template
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Template
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowEditor(!showEditor)}
+              className="text-xs text-blue-600 hover:text-blue-800"
+            >
+              {showEditor ? "Hide Editor" : "Edit Template"}
+            </button>
+          </div>
           <select
             value={template}
-            onChange={(e) => setTemplate(e.target.value)}
+            onChange={(e) => {
+              setTemplate(e.target.value);
+              setShowEditor(false);
+            }}
             disabled={templatesLoading}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           >
@@ -71,6 +88,15 @@ export default function ExtractionForm() {
             ))}
           </select>
         </div>
+
+        {/* Template Editor */}
+        {showEditor && selectedTemplate && (
+          <TemplateEditor
+            templateName={selectedTemplate.name}
+            questions={selectedTemplate.questions}
+            onSaved={refetch}
+          />
+        )}
 
         {/* Model */}
         <div>
@@ -85,6 +111,23 @@ export default function ExtractionForm() {
             <option value="qwen-7b">Qwen 7B (fast)</option>
             <option value="qwen-72b">Qwen 72B (accurate)</option>
           </select>
+        </div>
+
+        {/* Multi-entity toggle */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="multi-entity"
+            checked={multiEntity}
+            onChange={(e) => setMultiEntity(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="multi-entity" className="text-sm text-gray-700">
+            Multiple entities
+          </label>
+          <span className="text-xs text-gray-400">
+            Extract data for each product/entity in the document
+          </span>
         </div>
 
         {/* File upload */}
@@ -176,10 +219,14 @@ export default function ExtractionForm() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Results</h2>
-            <CopyButton results={result.results} />
+            <CopyButton results={result.results} entities={result.entities} />
           </div>
           <StatsBar stats={result.stats} />
-          <ResultsTable results={result.results} threshold={result.threshold} />
+          <ResultsTable
+            results={result.results}
+            threshold={result.threshold}
+            entities={result.entities}
+          />
         </div>
       )}
     </div>

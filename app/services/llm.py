@@ -18,16 +18,24 @@ except Exception as e:
 
 
 async def ask_question(
-    document_text: str, question: str, *, model: str = ""
+    document_text: str,
+    question: str,
+    *,
+    model: str = "",
+    system_prompt: str = "",
 ) -> dict:
     """Send a question about a document to the active LLM provider."""
     if model:
         provider = get_provider(model_override=model)
-        return await provider.ask_question(document_text, question)
+        return await provider.ask_question(
+            document_text, question, system_prompt=system_prompt
+        )
 
     if _provider is None:
         return {"answer": "Error: LLM provider not configured", "confidence": 0.0}
-    return await _provider.ask_question(document_text, question)
+    return await _provider.ask_question(
+        document_text, question, system_prompt=system_prompt
+    )
 
 
 async def check_health() -> bool:
