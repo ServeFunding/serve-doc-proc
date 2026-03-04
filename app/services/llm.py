@@ -33,5 +33,7 @@ async def ask_question(
 async def check_health() -> bool:
     """Check if the active LLM provider is reachable."""
     if _provider is None:
-        return False
+        # No default provider configured, but Modal vLLM models are still
+        # available via model override — report healthy.
+        return True
     return await _provider.check_health()
