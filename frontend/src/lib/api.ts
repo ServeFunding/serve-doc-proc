@@ -41,6 +41,7 @@ export async function extractDocument(
     method: "POST",
     headers: headers(),
     body: form,
+    signal: AbortSignal.timeout(5 * 60 * 1000), // 5 min for cold starts
   });
 
   if (!res.ok) {
