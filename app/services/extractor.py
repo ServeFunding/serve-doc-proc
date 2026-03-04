@@ -9,6 +9,8 @@ async def extract_from_document(
     document_text: str,
     template_name: str,
     threshold: float = 0.7,
+    *,
+    model: str = "",
 ) -> ExtractionResponse:
     """Run all template questions against document text and return results."""
     template = get_template(template_name)
@@ -20,7 +22,7 @@ async def extract_from_document(
     start_time = time.time()
 
     for field_key, question in questions.items():
-        raw = await ask_question(document_text, question)
+        raw = await ask_question(document_text, question, model=model)
         results[field_key] = QuestionResult(
             answer=raw["answer"],
             confidence=raw["confidence"],
@@ -38,6 +40,7 @@ async def extract_from_document(
     return ExtractionResponse(
         template=template_name,
         threshold=threshold,
+        model=model,
         results=results,
         filtered_results=filtered_results,
         stats=ExtractionStats(

@@ -3,9 +3,19 @@
 from app.config import settings
 from app.services.providers.base import LLMProvider
 
+MODAL_MODELS = {"qwen-7b", "qwen-72b"}
 
-def get_provider() -> LLMProvider:
-    """Return an LLM provider instance based on the current configuration."""
+
+def get_provider(model_override: str = "") -> LLMProvider:
+    """Return an LLM provider instance based on config or model override."""
+    if model_override and model_override in MODAL_MODELS:
+        from app.services.providers.modal_vllm import ModalVLLMProvider
+
+        return ModalVLLMProvider(model_override)
+
+    if model_override:
+        raise ValueError(f"Unknown model override: {model_override!r}")
+
     provider = settings.llm_provider
 
     if provider == "anthropic":

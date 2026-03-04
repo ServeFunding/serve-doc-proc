@@ -16,6 +16,7 @@ class ExtractionStats(BaseModel):
 class ExtractionResponse(BaseModel):
     template: str
     threshold: float
+    model: str = ""
     results: dict[str, QuestionResult]
     filtered_results: dict[str, str]
     stats: ExtractionStats

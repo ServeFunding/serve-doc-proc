@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    api_key: str = ""
     llm_provider: Literal["anthropic", "openai", "ollama"] = "anthropic"
     llm_model: str = ""
     anthropic_api_key: str = ""

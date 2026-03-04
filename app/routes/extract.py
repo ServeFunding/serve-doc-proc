@@ -1,4 +1,5 @@
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
 from app.models.schemas import (
@@ -22,12 +23,29 @@ ALLOWED_CONTENT_TYPES = {
     "image/bmp",
 }
 
+_bearer = HTTPBearer()
+
+
+async def verify_api_key(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+) -> str:
+    """Validate the Bearer token against the configured API key."""
+    if not settings.api_key:
+        raise HTTPException(
+            status_code=500, detail="Server API key not configured"
+        )
+    if credentials.credentials != settings.api_key:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return credentials.credentials
+
 
 @router.post("/extract", response_model=ExtractionResponse)
 async def extract_document(
     file: UploadFile = File(...),
     template: str = Form("merchant_application"),
     threshold: float = Form(0.7),
+    model: str = Form(""),
+    _key: str = Depends(verify_api_key),
 ):
     """Upload a document and extract structured data using a question template."""
     if get_template(template) is None:
@@ -68,7 +86,9 @@ async def extract_document(
             detail="No text could be extracted from the document. The file may be empty or unreadable.",
         )
 
-    result = await extract_from_document(document_text, template, threshold)
+    result = await extract_from_document(
+        document_text, template, threshold, model=model
+    )
     return result
 
 
