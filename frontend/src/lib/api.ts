@@ -29,11 +29,13 @@ export async function extractDocument(
   file: File,
   template: string,
   threshold: number,
+  model: string = "",
 ): Promise<ExtractionResponse> {
   const form = new FormData();
   form.append("file", file);
   form.append("template", template);
   form.append("threshold", threshold.toString());
+  if (model) form.append("model", model);
 
   const res = await fetch(`${API_URL}/extract`, {
     method: "POST",

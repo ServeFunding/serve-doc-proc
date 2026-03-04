@@ -13,6 +13,7 @@ const ACCEPTED = ".pdf,.png,.jpg,.jpeg,.tiff,.tif,.bmp";
 export default function ExtractionForm() {
   const { templates, loading: templatesLoading } = useTemplates();
   const [template, setTemplate] = useState("");
+  const [model, setModel] = useState("qwen-7b");
   const [threshold, setThreshold] = useState(0.7);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -33,7 +34,7 @@ export default function ExtractionForm() {
     setLoading(true);
     setError(null);
     try {
-      const data = await extractDocument(file, template, threshold);
+      const data = await extractDocument(file, template, threshold, model);
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Extraction failed");
@@ -68,6 +69,21 @@ export default function ExtractionForm() {
                 {t.description || t.name}
               </option>
             ))}
+          </select>
+        </div>
+
+        {/* Model */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Model
+          </label>
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="qwen-7b">Qwen 7B (fast)</option>
+            <option value="qwen-72b">Qwen 72B (accurate)</option>
           </select>
         </div>
 
