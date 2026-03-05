@@ -6,8 +6,8 @@ app = modal.App("serve-funding-deal-manager")
 model_cache = modal.Volume.from_name("vllm-model-cache", create_if_missing=True)
 MODEL_CACHE_PATH = "/root/.cache/huggingface"
 
-QWEN_7B_MODEL = "Qwen/Qwen2.5-7B-Instruct"
-QWEN_72B_MODEL = "Qwen/Qwen2.5-72B-Instruct-AWQ"
+QWEN_7B_MODEL = "Qwen/Qwen3-8B"
+QWEN_72B_MODEL = "Qwen/Qwen3-32B-AWQ"
 
 # --- Images ---
 
@@ -21,13 +21,13 @@ web_image = (
 # Pre-download model weights into the image so cold starts don't need to fetch them
 vllm_image_7b = (
     modal.Image.debian_slim(python_version="3.12")
-    .pip_install("vllm>=0.6.0", "torch>=2.4.0", "huggingface_hub")
+    .pip_install("vllm>=0.9.0", "torch>=2.4.0", "huggingface_hub")
     .run_commands(f"huggingface-cli download {QWEN_7B_MODEL}")
 )
 
-vllm_image_72b = (
+vllm_image_32b = (
     modal.Image.debian_slim(python_version="3.12")
-    .pip_install("vllm>=0.6.0", "torch>=2.4.0", "huggingface_hub")
+    .pip_install("vllm>=0.9.0", "torch>=2.4.0", "huggingface_hub")
     .run_commands(f"huggingface-cli download {QWEN_72B_MODEL}")
 )
 
@@ -43,7 +43,7 @@ vllm_image_72b = (
     timeout=600,
     secrets=[modal.Secret.from_name("serve-funding-secrets")],
 )
-class Qwen7B:
+class Qwen8B:
     model_name: str = QWEN_7B_MODEL
 
     @modal.enter()
@@ -72,7 +72,7 @@ class Qwen7B:
 
 
 @app.cls(
-    image=vllm_image_72b,
+    image=vllm_image_32b,
     gpu="A100-80GB",
     volumes={MODEL_CACHE_PATH: model_cache},
     min_containers=0,
@@ -80,7 +80,7 @@ class Qwen7B:
     timeout=600,
     secrets=[modal.Secret.from_name("serve-funding-secrets")],
 )
-class Qwen72B:
+class Qwen32B:
     model_name: str = QWEN_72B_MODEL
 
     @modal.enter()

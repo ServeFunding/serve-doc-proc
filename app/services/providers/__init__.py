@@ -3,7 +3,7 @@
 from app.config import settings
 from app.services.providers.base import LLMProvider
 
-MODAL_MODELS = {"qwen-7b", "qwen-72b"}
+MODAL_MODELS = {"qwen-8b", "qwen-32b"}
 
 
 def get_provider(model_override: str = "") -> LLMProvider:

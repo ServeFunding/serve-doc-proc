@@ -13,8 +13,8 @@ from app.services.providers.base import (
 logger = logging.getLogger(__name__)
 
 _CLASS_MAP = {
-    "qwen-7b": "Qwen7B",
-    "qwen-72b": "Qwen72B",
+    "qwen-8b": "Qwen8B",
+    "qwen-32b": "Qwen32B",
 }
 
 

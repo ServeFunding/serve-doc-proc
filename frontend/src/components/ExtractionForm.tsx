@@ -14,7 +14,7 @@ const ACCEPTED = ".pdf,.png,.jpg,.jpeg,.tiff,.tif,.bmp";
 export default function ExtractionForm() {
   const { templates, loading: templatesLoading, refetch } = useTemplates();
   const [template, setTemplate] = useState("");
-  const [model, setModel] = useState("qwen-7b");
+  const [model, setModel] = useState("qwen-8b");
   const [threshold, setThreshold] = useState(0.7);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -108,8 +108,8 @@ export default function ExtractionForm() {
             onChange={(e) => setModel(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           >
-            <option value="qwen-7b">Qwen 7B (fast)</option>
-            <option value="qwen-72b">Qwen 72B (accurate)</option>
+            <option value="qwen-8b">Qwen 3 8B (fast)</option>
+            <option value="qwen-32b">Qwen 3 32B (accurate)</option>
           </select>
         </div>
 

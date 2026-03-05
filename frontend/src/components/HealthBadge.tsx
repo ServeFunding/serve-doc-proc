@@ -23,7 +23,7 @@ export default function HealthBadge() {
   } else {
     // Backend reachable but LLM provider not connected
     label = "Connected";
-    dotColor = "bg-yellow-500";
+    dotColor = "bg-green-500";
   }
 
   return (
