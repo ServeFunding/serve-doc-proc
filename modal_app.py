@@ -36,7 +36,7 @@ vllm_image_32b = (
 
 @app.cls(
     image=vllm_image_7b,
-    gpu="A10G",
+    gpu="L4",
     volumes={MODEL_CACHE_PATH: model_cache},
     min_containers=0,
     scaledown_window=600,
@@ -73,7 +73,7 @@ class Qwen8B:
 
 @app.cls(
     image=vllm_image_32b,
-    gpu="A100-80GB",
+    gpu="L40S",
     volumes={MODEL_CACHE_PATH: model_cache},
     min_containers=0,
     scaledown_window=600,
